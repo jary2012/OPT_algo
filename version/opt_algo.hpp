@@ -2,8 +2,9 @@
 // 包含 OPT_algo 全部算法。
 #pragma once
 
+namespace opt_algo {
+
 // ==== math/quick_pow/iterative/quick_pow.hpp ====
-namespace opt_algo
 {
     template <typename T>
     T quick_pow_iterative(T a, T b, T mod)
@@ -21,10 +22,8 @@ namespace opt_algo
         }
         return res;
     }
-}
 
 // ==== math/quick_pow/recursive/quick_pow.hpp ====
-namespace opt_algo
 {
     template <typename T>
     T quick_pow_recursive(T a, T b, T mod)
@@ -41,5 +40,5 @@ namespace opt_algo
         }
         return half;
     }
-}
 
+} // namespace opt_algo
