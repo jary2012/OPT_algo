@@ -5,8 +5,7 @@
 namespace opt_algo {
 
 // ==== math/quick_pow/iterative/quick_pow.hpp ====
-{
-    template <typename T>
+template <typename T>
     T quick_pow_iterative(T a, T b, T mod)
     {
         T res = 1 % mod;
@@ -24,8 +23,7 @@ namespace opt_algo {
     }
 
 // ==== math/quick_pow/recursive/quick_pow.hpp ====
-{
-    template <typename T>
+template <typename T>
     T quick_pow_recursive(T a, T b, T mod)
     {
         if (b == 0)
