@@ -17,9 +17,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Merge all .hpp into version/opt_algo.hpp
+        shell: bash
         run: |
           python3 << 'EOF'
-          import os, sys
+          import os, re
           from pathlib import Path
 
           ROOT = Path(".")
@@ -28,7 +29,7 @@ jobs:
           out_file = ROOT / "version" / "opt_algo.hpp"
           out_file.parent.mkdir(parents=True, exist_ok=True)
 
-          # 收集所有 .hpp 文件 (按路径排序)
+          # 收集所有 .hpp 文件（按路径排序保证稳定）
           files = []
           for d in dirs:
               dp = ROOT / d
@@ -45,34 +46,35 @@ jobs:
               for f in files:
                   out.write(f"// ==== {f} ====\n")
                   with open(f, "r", encoding="utf-8") as fin:
-                      content = fin.read()
-                  lines = content.splitlines()
-                  cleaned = []
-                  in_ns = False
-                  depth = 0
-                  for line in lines:
-                      # 跳过 #pragma once
-                      if line.strip() == "#pragma once":
-                          continue
-                      if not in_ns:
-                          # 发现 namespace opt_algo 声明
-                          if 'namespace opt_algo' in line:
-                              in_ns = True
-                              # 如果声明行自带 { ，也要计数
-                              if '{' in line:
-                                  depth += line.count('{') - line.count('}')
-                              continue
-                          else:
-                              cleaned.append(line)
-                      else:
-                          # 已经在命名空间内部，跟踪大括号
-                          depth += line.count('{') - line.count('}')
-                          if depth <= 0:
-                              in_ns = False
-                              continue
-                          cleaned.append(line)
-                  out.write('\n'.join(cleaned))
-                  out.write("\n\n")
+                      raw = fin.read()
+
+                  # 移除所有 #pragma once 行（含前后空白）
+                  raw = re.sub(r'^\s*#pragma\s+once\s*$\n?', '', raw, flags=re.MULTILINE)
+
+                  # 提取 namespace opt_algo { ... } 内部的代码
+                  # 匹配 namespace opt_algo 声明（可能跨行，允许注释）
+                  m = re.search(r'namespace\s+opt_algo\s*\{', raw)
+                  if m:
+                      start = m.end()   # 从 { 之后开始
+                      depth = 0
+                      i = start
+                      while i < len(raw):
+                          ch = raw[i]
+                          if ch == '{':
+                              depth += 1
+                          elif ch == '}':
+                              if depth == 0:
+                                  break   # 找到了匹配的外层 }
+                              depth -= 1
+                          i += 1
+                      # 提取内部代码（去掉首尾空白）
+                      inner = raw[start:i].strip()
+                      out.write(inner)
+                      out.write("\n\n")
+                  else:
+                      # 极少情况：文件没有包裹在 namespace opt_algo 中
+                      # 直接写入全部内容（除去 pragma once）
+                      out.write(raw.strip() + "\n\n")
 
               out.write("} // namespace opt_algo\n")
 
