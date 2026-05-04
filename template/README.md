@@ -1,6 +1,1 @@
-# 快速幂 - 迭代版
-
-- **简介**：快速幂函数的迭代版实现
-- **复杂度**：时间 O(log b)  空间 O(1)
-- **适用条件**：mod > 0，a、b 为非负整数
-- **使用示例**：[P1226 【模板】快速幂]<https://www.luogu.com.cn/problem/P1226>，示例代码见examples/P1226
+见math/quick_pow及所有附属文件夹和examples/P1226.cpp
